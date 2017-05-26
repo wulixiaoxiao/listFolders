@@ -3,6 +3,7 @@
 error_reporting(0);
 $dir = $_GET['dir'];
 $zDir = $_GET['zDir'];
+$exts = explode(',',$_GET['exts']);
 
 
 if($zDir) {
@@ -38,7 +39,7 @@ function read_file($file_path){
 	exit;
 }
 
-function read_dir($dir) 
+function read_dir($dir,$exts) 
 {
 	$list = [];
 	$handle = opendir($dir);
@@ -47,13 +48,20 @@ function read_dir($dir)
 		if (is_dir($dir.'/'.$file)) {
 			$list['dirl'][] = $file;
 		} else {
-			$list['files'][] = $file;
+			if(!empty($exts[0])){
+				if(in_array(pathinfo($file, PATHINFO_EXTENSION),$exts)){
+					$list['files'][] = $file;
+					continue;
+				}
+			}else{
+				$list['files'][] = $file;
+			}
 		}
 	}
 	return $list;
 }
 
-$list = (read_dir($dir));
+$list = (read_dir($dir,$exts));
 $list['dirl'] && array_multisort($list['dirl']);
 
 $list['files'] && array_multisort($list['files']);
@@ -87,13 +95,15 @@ $list['files'] && array_multisort($list['files']);
 <script>
 
 var Base = "<?php echo $dir;?>";
+
+var Exts = "<?php echo $_GET['exts'];?>";
 function readdir(Path, tag = 0){
 	
 	if (tag == 1) {
-		location.href = '?zDir='+ Path;
+		location.href = '?zDir='+ Path + '&exts=' + Exts;
 		return ;
 	}
-	location.href = '?zDir='+ Base + '/' + Path;
+	location.href = '?zDir='+ Base + '/' + Path + '&exts=' + Exts;
 }
 
 function readfile(file){
